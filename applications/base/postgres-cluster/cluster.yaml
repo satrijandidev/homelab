@@ -1,0 +1,33 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres-cluster
+  namespace: postgres
+spec:
+  instances: 3
+  
+  postgresql:
+    parameters:
+      max_connections: "200"
+      log_statement: "all"
+      log_duration: "on"
+      
+  bootstrap:
+    initdb:
+      database: homelab
+      owner: homelab_user
+      secret:
+        name: postgres-credentials
+        
+  storage:
+    size: 1Gi
+    storageClass: standard
+    
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+      

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cilium
+  namespace: kube-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: cilium-agent
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        env:
+        - name: CILIUM_MEMORY_LIMIT
+          value: "512Mi"
+        - name: GOMEMLIMIT
+          value: "450MiB"

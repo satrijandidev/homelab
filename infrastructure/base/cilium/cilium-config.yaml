@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cilium-config
+  namespace: kube-system
+data:
+  # Security hardening
+  enable-policy: "default"
+  policy-enforcement: "default"
+  enable-l7-proxy: "true"
+  enable-ipv4: "true"
+  enable-ipv6: "false"
+  
+  # Network security
+  enable-host-firewall: "true"
+  enable-endpoint-health-checking: "true"
+  enable-health-checking: "true"
+  enable-well-known-identities: "false"
+  
+  # Observability and monitoring
+  enable-hubble: "true"
+  hubble-socket-path: "/var/run/cilium/hubble.sock"
+  hubble-metrics-server: ":9965"
+  hubble-metrics: "dns,drop,tcp,flow,icmp,http"
+  
+  # Performance and reliability
+  enable-bandwidth-manager: "true"
+  enable-local-redirect-policy: "true"
+  kube-proxy-replacement: "strict"
+  
+  # Cluster mesh and identity
+  cluster-name: "homelab"
+  cluster-id: "1"
+  
+  # Debug and logging
+  debug: "false"
+  log-level: "info"
+  
+  # eBPF optimizations
+  enable-bpf-masquerade: "true"
+  enable-xt-socket-fallback: "true"
+  install-iptables-rules: "true"
+  
+  # Security policies
+  enable-remote-node-identity: "true"
+  identity-allocation-mode: "crd"

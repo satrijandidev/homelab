@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+spec:
+  template:
+    spec:
+      containers:
+      - name: cert-manager-controller
+        args:
+        - --v=2
+        - --cluster-resource-namespace=$(POD_NAMESPACE)
+        - --leader-election-namespace=kube-system
+        - --enable-certificate-owner-ref=true
+        - --metrics-bind-address=0.0.0.0:9402
+        - --prometheus-metrics-enabled=true
+        ports:
+        - containerPort: 9402
+          name: http-metrics
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cert-manager-metrics
+  namespace: cert-manager
+  labels:
+    app.kubernetes.io/name: cert-manager
+    app.kubernetes.io/component: controller
+spec:
+  selector:
+    app.kubernetes.io/name: cert-manager
+    app.kubernetes.io/component: controller
+  ports:
+  - name: http-metrics
+    port: 9402
+    targetPort: 9402
+    protocol: TCP

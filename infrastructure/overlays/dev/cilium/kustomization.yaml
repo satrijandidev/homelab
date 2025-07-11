@@ -1,0 +1,33 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: cilium-dev
+  annotations:
+    config.kubernetes.io/local-config: "true"
+
+resources:
+  - ../../../base/cilium
+
+namespace: kube-system
+
+labels:
+  - pairs:
+      environment: dev
+      app.kubernetes.io/instance: cilium-dev
+
+patches:
+  - patch: |-
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: cilium-config
+        namespace: kube-system
+      data:
+        debug: "true"
+        log-level: "debug"
+        enable-debug: "true"
+        hubble-metrics: "dns,drop,tcp,flow,icmp,http,port-distribution"
+    target:
+      kind: ConfigMap
+      name: cilium-config

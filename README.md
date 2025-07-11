@@ -60,6 +60,7 @@ homelab/
 - **PgAdmin**: Web-based database administration interface
 
 ### Infrastructure
+- **ArgoCD**: GitOps continuous delivery tool
 - **Cert-Manager**: Automatic SSL certificate provisioning
 - **Cilium**: Advanced networking with security policies
 - **CloudNative-PG**: PostgreSQL operator for cloud-native deployments
@@ -78,12 +79,51 @@ homelab/
 - Kubernetes manifest security validation
 - Regular security audits and compliance checks
 
+## ⚙️ System Requirements
+
+### Minimum Hardware Requirements
+
+#### Development Environment
+- **CPU**: 3 cores minimum
+- **Memory**: 8Gi RAM minimum
+- **Storage**: 30Gi minimum
+- **Nodes**: 1-2 nodes
+
+#### Staging Environment
+- **CPU**: 4 cores minimum
+- **Memory**: 10Gi RAM minimum
+- **Storage**: 50Gi minimum
+- **Nodes**: 2-3 nodes
+
+#### Production Environment
+- **CPU**: 8 cores minimum
+- **Memory**: 16Gi RAM minimum
+- **Storage**: 150Gi minimum
+- **Nodes**: 3+ nodes (for high availability)
+
+### Resource Allocation by Environment
+
+| Component | Dev CPU/Memory | Staging CPU/Memory | Prod CPU/Memory |
+|-----------|----------------|-------------------|-----------------|
+| **Applications** | 1.8 cores / 2.9Gi | 2.1 cores / 3.6Gi | 3.4 cores / 6.2Gi |
+| **Infrastructure** | 1.3 cores / 2.5Gi | 1.5 cores / 3.0Gi | 2.2 cores / 4.9Gi |
+| **System Overhead** | 0.5 cores / 1.6Gi | 0.9 cores / 2.4Gi | 1.4 cores / 3.4Gi |
+| **Total Required** | 3.6 cores / 7.0Gi | 4.5 cores / 9.0Gi | 7.0 cores / 14.5Gi |
+
+### Key Resource Consumers
+
+- **ArgoCD**: Most resource-intensive infrastructure component
+- **ClickHouse**: Scales significantly in production (4x CPU, 4x memory)
+- **PostgreSQL**: Consistent 3-instance HA cluster across all environments
+- **Monitoring Stack**: Prometheus + Grafana for observability
+
 ## 🛠️ Quick Start
 
 ### Prerequisites
 - Kubernetes cluster (1.25+)
 - kubectl configured with cluster access
 - Kustomize (v4.5+)
+- Sufficient resources per environment requirements above
 
 ### Deploy Infrastructure
 ```bash
@@ -113,6 +153,9 @@ kubectl port-forward -n monitoring svc/grafana 3000:3000
 
 # Port forward PgAdmin
 kubectl port-forward -n postgresql svc/pgadmin 5050:80
+
+# ArgoCD
+kubectl port-forward -n argocd svc/argocd-server 8080:443
 ```
 
 ## 📊 Monitoring & Observability
@@ -122,6 +165,11 @@ Access Prometheus at `localhost:9090` (when port-forwarded)
 
 ### Grafana Dashboards
 Access Grafana at `localhost:3000` (when port-forwarded)
+
+### ArgoCD GitOps
+Access ArgoCD at `https://localhost:8080` (when port-forwarded)
+- Username: `admin`
+- Password: `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d`
 
 ### Health Checks
 ```bash
@@ -133,6 +181,7 @@ kubectl get pods -A
 kubectl get pods -n clickhouse
 kubectl get pods -n monitoring
 kubectl get pods -n postgresql
+kubectl get pods -n argocd
 ```
 
 ## 🔧 Common Operations
@@ -150,6 +199,9 @@ kubectl port-forward -n monitoring svc/prometheus 9090:9090
 
 # PgAdmin
 kubectl port-forward -n postgresql svc/pgadmin 5050:80
+
+# ArgoCD
+kubectl port-forward -n argocd svc/argocd-server 8080:443
 ```
 
 ### Database Operations

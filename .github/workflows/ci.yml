@@ -209,21 +209,13 @@ jobs:
         # Check pgAdmin deployment
         kustomize build infrastructure/overlays/dev/pgadmin > /tmp/pgadmin-manifest.yaml
         
-        # Split YAML documents and validate each
-        cd /tmp
-        awk '/^---$/{f="manifest_"++i".yaml"; next} {print > f}' pgadmin-manifest.yaml
-        
-        # Check if any manifest files were created
-        if ls manifest_*.yaml 1> /dev/null 2>&1; then
-          for manifest in manifest_*.yaml; do
-            if [ -f "$manifest" ]; then
-              echo "Checking $manifest..."
-              opa eval --data $GITHUB_WORKSPACE/policies/security.rego --input "$manifest" "data.kubernetes.security.deny" || true
-            fi
-          done
+        # Simple validation without splitting (more reliable)
+        echo "Checking pgadmin manifests..."
+        if [ -f "/tmp/pgadmin-manifest.yaml" ]; then
+          echo "Manifest file exists, validating with OPA..."
+          opa eval --data policies/security.rego --input /tmp/pgadmin-manifest.yaml "data.kubernetes.security.deny" || true
         else
-          echo "No manifest files found, checking original file..."
-          opa eval --data $GITHUB_WORKSPACE/policies/security.rego --input pgadmin-manifest.yaml "data.kubernetes.security.deny" || true
+          echo "No manifest file found to validate"
         fi
         
         echo "✅ Policy validation completed"

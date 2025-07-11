@@ -170,7 +170,6 @@ Access Grafana at `localhost:3000` (when port-forwarded)
 Access ArgoCD at `https://localhost:8080` (when port-forwarded)
 - Username: `admin`
 - Password: `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d`
-
 ### Health Checks
 ```bash
 # Check cluster health

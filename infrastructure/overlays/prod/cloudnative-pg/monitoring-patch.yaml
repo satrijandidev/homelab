@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cnpg-controller-manager
+  namespace: cnpg-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: manager
+        env:
+        - name: MONITORING_ENABLED
+          value: "true"
+        - name: MONITORING_QUERIES_ENABLED
+          value: "true"

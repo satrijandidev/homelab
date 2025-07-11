@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cilium
+  namespace: kube-system
+spec:
+  template:
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: cilium-agent
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+            add:
+            - NET_ADMIN
+            - NET_RAW
+            - SYS_ADMIN
+            - SYS_RESOURCE
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: cilium-run
+          mountPath: /var/run/cilium
+        - name: bpf-maps
+          mountPath: /sys/fs/bpf
+        - name: cilium-cgroup
+          mountPath: /run/cilium/cgroupv2
+          mountPropagation: HostToContainer
+        - name: proc-sys-net
+          mountPath: /host/proc/sys/net
+        - name: proc-sys-kernel
+          mountPath: /host/proc/sys/kernel
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: cilium-run
+        hostPath:
+          path: /var/run/cilium
+          type: DirectoryOrCreate
+      - name: bpf-maps
+        hostPath:
+          path: /sys/fs/bpf
+          type: DirectoryOrCreate
+      - name: cilium-cgroup
+        hostPath:
+          path: /run/cilium/cgroupv2
+          type: DirectoryOrCreate
+      - name: proc-sys-net
+        hostPath:
+          path: /proc/sys/net
+          type: Directory
+      - name: proc-sys-kernel
+        hostPath:
+          path: /proc/sys/kernel
+          type: Directory

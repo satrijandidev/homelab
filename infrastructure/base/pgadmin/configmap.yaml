@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgadmin-config
+  namespace: pgadmin
+data:
+  config_local.py: |
+    import os
+    
+    # Security settings
+    CSRF_ENABLED = True
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    
+    # Logging
+    DEFAULT_SERVER = '0.0.0.0'
+    
+    # Disable password saving
+    ALLOW_SAVE_PASSWORD = False
+    
+    # Session timeout (30 minutes)
+    SESSION_EXPIRATION_TIME = 30
+    
+    # Security headers
+    SECURITY_HEADERS = {
+        'X-Frame-Options': 'DENY',
+        'X-Content-Type-Options': 'nosniff',
+        'X-XSS-Protection': '1; mode=block',
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
+    }

@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: cloudnative-pg-base
+  annotations:
+    config.kubernetes.io/local-config: "true"
+
+resources:
+  - https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.26/releases/cnpg-1.26.0.yaml
+
+namespace: cnpg-system
+
+commonLabels:
+  app.kubernetes.io/name: cloudnative-pg
+  app.kubernetes.io/part-of: homelab-infrastructure
+
+patchesStrategicMerge:
+  - security-context.yaml
+  - resource-limits.yaml

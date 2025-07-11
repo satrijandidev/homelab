@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: cilium-base
+  annotations:
+    config.kubernetes.io/local-config: "true"
+
+resources:
+  - cilium-install.yaml
+
+namespace: kube-system
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: cilium
+      app.kubernetes.io/part-of: homelab-infrastructure
+      app.kubernetes.io/managed-by: kustomize
+
+patches:
+  - path: security-context.yaml
+    target:
+      kind: DaemonSet
+      name: cilium
+  - path: cilium-config.yaml
+    target:
+      kind: ConfigMap
+      name: cilium-config
+  - path: resource-limits.yaml
+    target:
+      kind: DaemonSet
+      name: cilium

@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: cloudnative-pg-staging
+  annotations:
+    config.kubernetes.io/local-config: "true"
+
+resources:
+  - ../../../base/cloudnative-pg
+
+namespace: cnpg-system
+
+commonLabels:
+  environment: staging
+  app.kubernetes.io/instance: cloudnative-pg-staging
+
+patchesStrategicMerge:
+  - replica-patch.yaml

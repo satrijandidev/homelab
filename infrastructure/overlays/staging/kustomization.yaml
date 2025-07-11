@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: homelab-infrastructure-staging
+  labels:
+    app.kubernetes.io/name: homelab-infrastructure
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/component: infrastructure
+    environment: staging
+
+# Staging infrastructure overlay
+# Includes all base infrastructure components with staging-specific patches
+
+resources:
+  - ../../base/cert-manager
+  - ../../base/cilium
+  - ../../base/cloudnative-pg
+  - ../../base/metrics-server
+  - ../../base/pgadmin
+  - argocd
+
+# Staging-specific patches
+patchesStrategicMerge:
+  - cert-manager/replica-patch.yaml
+  - cloudnative-pg/replica-patch.yaml
+  - pgadmin/replica-patch.yaml
+
+# Staging environment labels
+commonLabels:
+  environment: staging
+  tier: infrastructure
+  managed-by: kustomize
+
+# Staging annotations
+commonAnnotations:
+  deployment.kubernetes.io/managed-by: kustomize
+  homelab.io/environment: staging
+  homelab.io/tier: infrastructure

@@ -243,7 +243,7 @@ jobs:
         kustomize-version: "5.0.0"
 
     - name: Create kind cluster
-      uses: helm/kind-action@v1.10.0
+      uses: helm/kind-action@v1.12.0
       with:
         config: kind-cluster.yaml
 

@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-config
+  namespace: clickhouse
+  labels:
+    app.kubernetes.io/name: clickhouse
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: homelab-applications
+data:
+  config.xml: |
+    <?xml version="1.0"?>
+    <clickhouse>
+        <!-- Paths -->
+        <path>/var/lib/clickhouse/</path>
+        <tmp_path>/var/lib/clickhouse/tmp/</tmp_path>
+        <user_files_path>/var/lib/clickhouse/user_files/</user_files_path>
+        <format_schema_path>/var/lib/clickhouse/format_schemas/</format_schema_path>
+        
+        <!-- Logging -->
+        <logger>
+            <level>information</level>
+            <log>/var/log/clickhouse-server/clickhouse-server.log</log>
+            <errorlog>/var/log/clickhouse-server/clickhouse-server.err.log</errorlog>
+            <size>1000M</size>
+            <count>10</count>
+        </logger>
+        
+        <!-- Network -->
+        <listen_host>0.0.0.0</listen_host>
+        <http_port>8123</http_port>
+        <tcp_port>9000</tcp_port>
+        <mysql_port>9004</mysql_port>
+        
+        <!-- Security -->
+        <max_connections>4096</max_connections>
+        <keep_alive_timeout>3</keep_alive_timeout>
+        <max_concurrent_queries>100</max_concurrent_queries>
+        <uncompressed_cache_size>8589934592</uncompressed_cache_size>
+        <mark_cache_size>5368709120</mark_cache_size>
+        
+        <!-- Memory settings moved to profiles section -->
+        
+        <!-- Distributed -->
+        <distributed_ddl>
+            <path>/clickhouse/task_queue/ddl</path>
+        </distributed_ddl>
+        
+        <!-- Query log -->
+        <query_log>
+            <database>system</database>
+            <table>query_log</table>
+            <partition_by>toYYYYMM(event_date)</partition_by>
+            <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+        </query_log>
+        
+        <!-- Part log -->
+        <part_log>
+            <database>system</database>
+            <table>part_log</table>
+            <partition_by>toYYYYMM(event_date)</partition_by>
+            <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+        </part_log>
+        
+        <!-- Security and access control -->
+        <access_control_path>/var/lib/clickhouse/access/</access_control_path>
+        
+        <!-- Profiles -->
+        <profiles>
+            <default>
+                <max_memory_usage>10000000000</max_memory_usage>
+                <max_bytes_before_external_group_by>20000000000</max_bytes_before_external_group_by>
+                <max_bytes_before_external_sort>20000000000</max_bytes_before_external_sort>
+                <use_uncompressed_cache>0</use_uncompressed_cache>
+                <load_balancing>random</load_balancing>
+            </default>
+            <readonly>
+                <readonly>1</readonly>
+            </readonly>
+        </profiles>
+        
+        <!-- Quotas -->
+        <quotas>
+            <default>
+                <interval>
+                    <duration>3600</duration>
+                    <queries>0</queries>
+                    <errors>0</errors>
+                    <result_rows>0</result_rows>
+                    <read_rows>0</read_rows>
+                    <execution_time>0</execution_time>
+                </interval>
+            </default>
+        </quotas>
+    </clickhouse>

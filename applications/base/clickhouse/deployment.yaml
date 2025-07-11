@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clickhouse
+  namespace: clickhouse
+  labels:
+    app.kubernetes.io/name: clickhouse
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: homelab-applications
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: clickhouse
+      app.kubernetes.io/component: database
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: clickhouse
+        app.kubernetes.io/component: database
+        app.kubernetes.io/part-of: homelab-applications
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: clickhouse
+        image: clickhouse/clickhouse-server:24.10-alpine
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+        ports:
+        - name: http
+          containerPort: 8123
+          protocol: TCP
+        - name: native
+          containerPort: 9000
+          protocol: TCP
+        - name: mysql
+          containerPort: 9004
+          protocol: TCP
+        env:
+        - name: CLICKHOUSE_DB
+          value: "default"
+        - name: CLICKHOUSE_USER
+          value: "clickhouse"
+        - name: CLICKHOUSE_PASSWORD
+          value: "changeme123!"
+        - name: CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT
+          value: "1"
+        volumeMounts:
+        - name: clickhouse-data
+          mountPath: /var/lib/clickhouse
+        - name: clickhouse-config
+          mountPath: /etc/clickhouse-server/config.d
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+        - name: var-tmp
+          mountPath: /var/tmp
+        - name: var-log
+          mountPath: /var/log/clickhouse-server
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      volumes:
+      - name: clickhouse-data
+        persistentVolumeClaim:
+          claimName: clickhouse-data
+      - name: clickhouse-config
+        configMap:
+          name: clickhouse-config
+      - name: tmp
+        emptyDir: {}
+      - name: var-tmp
+        emptyDir: {}
+      - name: var-log
+        emptyDir: {}
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: clickhouse-data
+  namespace: clickhouse
+  labels:
+    app.kubernetes.io/name: clickhouse
+    app.kubernetes.io/component: storage
+    app.kubernetes.io/part-of: homelab-applications
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

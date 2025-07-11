@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: clickhouse-dev
+  annotations:
+    config.kubernetes.io/local-config: "true"
+
+resources:
+  - ../../../base/clickhouse
+
+namespace: clickhouse
+
+commonLabels:
+  environment: dev
+  app.kubernetes.io/instance: clickhouse-dev
+
+patchesStrategicMerge:
+  - replica-patch.yaml
+  - resource-patch.yaml
+
+configMapGenerator:
+  - name: clickhouse-dev-config
+    literals:
+      - log_level=debug
+      - enable_query_log=true

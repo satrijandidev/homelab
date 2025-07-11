@@ -1,0 +1,36 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: homelab-applications-prod
+  labels:
+    app.kubernetes.io/name: homelab-applications
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/component: applications
+    environment: production
+
+# Production applications overlay
+# Includes all base applications with production-specific patches
+
+resources:
+  - ../../base/clickhouse
+  - ../../base/monitoring
+  - ../../base/postgres-cluster
+
+# Production-specific patches
+patchesStrategicMerge:
+  - clickhouse/replica-patch.yaml
+  - clickhouse/resource-patch.yaml
+  - clickhouse/monitoring-patch.yaml
+
+# Production environment labels
+commonLabels:
+  environment: production
+  tier: application
+  managed-by: kustomize
+
+# Production annotations
+commonAnnotations:
+  deployment.kubernetes.io/managed-by: kustomize
+  homelab.io/environment: production
+  homelab.io/tier: application

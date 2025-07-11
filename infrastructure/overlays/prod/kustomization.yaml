@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: homelab-infrastructure-prod
+  labels:
+    app.kubernetes.io/name: homelab-infrastructure
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/component: infrastructure
+    environment: production
+
+# Production infrastructure overlay
+# Includes all base infrastructure components with production-specific patches
+
+resources:
+  - ../../base/cert-manager
+  - ../../base/cilium
+  - ../../base/cloudnative-pg
+  - ../../base/metrics-server
+  - ../../base/pgadmin
+  - argocd
+
+# Production-specific patches
+patchesStrategicMerge:
+  - cert-manager/replica-patch.yaml
+  - cert-manager/monitoring-patch.yaml
+  - cloudnative-pg/replica-patch.yaml
+  - cloudnative-pg/monitoring-patch.yaml
+  - pgadmin/replica-patch.yaml
+  - pgadmin/resource-patch.yaml
+
+# Production environment labels
+commonLabels:
+  environment: production
+  tier: infrastructure
+  managed-by: kustomize
+
+# Production annotations
+commonAnnotations:
+  deployment.kubernetes.io/managed-by: kustomize
+  homelab.io/environment: production
+  homelab.io/tier: infrastructure

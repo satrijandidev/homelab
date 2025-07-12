@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: auth
+  labels:
+    name: auth
+    security.homelab.io/enforce: "strict"
+    networking.homelab.io/access: "restricted"

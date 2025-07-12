@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dex
+  namespace: auth
+data:
+  config.yaml: |
+    issuer: https://auth.homelab.local/dex
+    storage:
+      type: kubernetes
+      config:
+        inCluster: true
+    web:
+      http: 0.0.0.0:5556
+    logger:
+      level: "info"
+      format: text
+    oauth2:
+      skipApprovalScreen: true
+    enablePasswordDB: true
+    staticPasswords:
+    - email: admin@homelab.local
+      hashFromEnv: DEX_ADMIN_PASSWORD
+      username: admin
+      userID: "1"
+    - email: user@homelab.local
+      hashFromEnv: DEX_USER_PASSWORD
+      username: user
+      userID: "2"
+    staticClients:
+    - id: oauth2-proxy
+      name: 'OAuth2 Proxy'
+      secretEnv: DEX_OAUTH2_PROXY_CLIENT_SECRET
+      redirectURIs:
+      - 'https://auth.homelab.local/oauth2/callback'
+    # Optional: Add connectors for external providers
+    # connectors:
+    # - type: github
+    #   id: github
+    #   name: GitHub
+    #   config:
+    #     clientID: $GITHUB_CLIENT_ID
+    #     clientSecret: $GITHUB_CLIENT_SECRET
+    #     redirectURI: https://auth.homelab.local/dex/callback
+    #     orgs:
+    #     - name: your-org
